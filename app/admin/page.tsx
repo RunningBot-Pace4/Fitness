@@ -26,6 +26,8 @@ export default async function AdminPage() {
         id: true,
         name: true,
         email: true,
+        keyFob: true,
+        membershipType: true,
         status: true
       }
     }),

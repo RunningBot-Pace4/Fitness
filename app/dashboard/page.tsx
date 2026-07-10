@@ -49,7 +49,12 @@ export default async function DashboardPage() {
     <main>
       <div className="container stack">
         <header>
-          <span className="badge">{user.fitnessCenter.name}</span>
+          <div className="actions">
+            <span className="badge">{user.fitnessCenter.name}</span>
+            <span className="badge">
+              {user.membershipType === "MEMBER" ? "Member" : "Non-member"}
+            </span>
+          </div>
           <h1 className="page-title">Hi, {user.name}</h1>
           <p className="subtitle">Vote when a class pool is open.</p>
         </header>

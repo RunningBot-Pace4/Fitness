@@ -66,6 +66,7 @@ export async function getCurrentUser() {
         email: true,
         role: true,
         status: true,
+        membershipType: true,
         fitnessCenterId: true,
         fitnessCenter: {
           select: { name: true }

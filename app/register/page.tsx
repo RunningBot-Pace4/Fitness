@@ -21,7 +21,7 @@ export default function RegisterPage() {
         name: form.get("name"),
         email: form.get("email"),
         password: form.get("password"),
-        centerKey: form.get("centerKey")
+        keyFob: form.get("keyFob")
       })
     });
 
@@ -41,7 +41,8 @@ export default function RegisterPage() {
         <section className="card auth-card">
           <h1>Create account</h1>
           <p className="muted">
-            Register using the fitness center key supplied by your gym.
+            Enter your unique member key fob number. The fitness center will
+            verify it before approving your account.
           </p>
           <form className="form" onSubmit={handleSubmit}>
             <div className="field">
@@ -54,18 +55,11 @@ export default function RegisterPage() {
             </div>
             <div className="field">
               <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                minLength={8}
-                autoComplete="new-password"
-                required
-              />
+              <input id="password" name="password" type="password" minLength={8} required />
             </div>
             <div className="field">
-              <label htmlFor="centerKey">Fitness center key</label>
-              <input id="centerKey" name="centerKey" required />
+              <label htmlFor="keyFob">Member key fob number</label>
+              <input id="keyFob" name="keyFob" placeholder="Example: FOB-001234" required />
             </div>
             <button className="button" disabled={isLoading}>
               {isLoading ? "Creating..." : "Register"}

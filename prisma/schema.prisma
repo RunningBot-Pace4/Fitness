@@ -23,10 +23,15 @@ enum VoteValue {
   NO
 }
 
+enum MembershipType {
+  MEMBER
+  NON_MEMBER
+}
+
 model FitnessCenter {
   id        String      @id @default(cuid())
   name      String
-  centerKey String      @unique
+  slug      String      @unique
   users     User[]
   classes   ClassSlot[]
   createdAt DateTime    @default(now())
@@ -38,6 +43,8 @@ model User {
   name            String
   email           String        @unique
   passwordHash    String
+  keyFob          String        @unique
+  membershipType  MembershipType @default(NON_MEMBER)
   role            UserRole      @default(USER)
   status          UserStatus    @default(PENDING)
   fitnessCenterId String

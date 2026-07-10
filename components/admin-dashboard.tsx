@@ -7,6 +7,8 @@ type UserItem = {
   id: string;
   name: string;
   email: string;
+  keyFob: string;
+  membershipType: "MEMBER" | "NON_MEMBER";
   status: "PENDING" | "APPROVED" | "REJECTED";
 };
 
@@ -29,17 +31,43 @@ export default function AdminDashboard({ users, classes }: Props) {
 
   async function updateUser(
     userId: string,
-    status: "APPROVED" | "REJECTED"
+    data: {
+      status?: "APPROVED" | "REJECTED";
+      membershipType?: "MEMBER" | "NON_MEMBER";
+      keyFob?: string;
+    }
   ): Promise<void> {
     const response = await fetch(`/api/admin/users/${userId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
+      body: JSON.stringify(data)
     });
 
-    const data = (await response.json()) as { error?: string; message?: string };
-    setMessage(data.message ?? data.error ?? "");
-    router.refresh();
+    const result = (await response.json()) as {
+      error?: string;
+      message?: string;
+    };
+
+    setMessage(result.message ?? result.error ?? "");
+
+    if (response.ok) {
+      router.refresh();
+    }
+  }
+
+  async function updateMemberDetails(
+    event: FormEvent<HTMLFormElement>,
+    userId: string
+  ): Promise<void> {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+
+    await updateUser(userId, {
+      keyFob: String(formData.get("keyFob") ?? ""),
+      membershipType: String(
+        formData.get("membershipType")
+      ) as "MEMBER" | "NON_MEMBER"
+    });
   }
 
   async function createClass(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -81,64 +109,129 @@ export default function AdminDashboard({ users, classes }: Props) {
             <label htmlFor="title">Class title</label>
             <input id="title" name="title" required />
           </div>
+
           <div className="field">
             <label htmlFor="description">Description</label>
             <textarea id="description" name="description" />
           </div>
+
           <div className="grid grid-2">
             <div className="field">
               <label htmlFor="releaseAt">Release time</label>
-              <input id="releaseAt" name="releaseAt" type="datetime-local" required />
+              <input
+                id="releaseAt"
+                name="releaseAt"
+                type="datetime-local"
+                required
+              />
             </div>
+
             <div className="field">
               <label htmlFor="closesAt">Closing time (optional)</label>
               <input id="closesAt" name="closesAt" type="datetime-local" />
             </div>
           </div>
+
           <button className="button">Publish class</button>
         </form>
       </section>
 
       <section className="card">
-        <h2>Member approvals</h2>
+        <h2>Member management</h2>
+
         <div className="stack">
-          {users.length === 0 && <p className="muted">No members found.</p>}
+          {users.length === 0 && <p className="muted">No users found.</p>}
+
           {users.map((user) => (
-            <div className="row" key={user.id}>
-              <div>
-                <strong>{user.name}</strong>
-                <div className="muted">{user.email}</div>
-                <span className="badge">{user.status}</span>
+            <article className="card" key={user.id}>
+              <div className="row">
+                <div>
+                  <strong>{user.name}</strong>
+                  <div className="muted">{user.email}</div>
+                </div>
+
+                <div className="actions">
+                  <span className="badge">{user.membershipType}</span>
+                  <span className="badge">{user.status}</span>
+                </div>
               </div>
-              <div className="actions">
-                <button
-                  className="button"
-                  onClick={() => updateUser(user.id, "APPROVED")}
-                >
-                  Approve
-                </button>
-                <button
-                  className="button danger"
-                  onClick={() => updateUser(user.id, "REJECTED")}
-                >
-                  Reject
-                </button>
-              </div>
-            </div>
+
+              <hr />
+
+              <form
+                className="form"
+                onSubmit={(event) => updateMemberDetails(event, user.id)}
+              >
+                <div className="grid grid-2">
+                  <div className="field">
+                    <label htmlFor={`keyFob-${user.id}`}>Key fob</label>
+                    <input
+                      id={`keyFob-${user.id}`}
+                      name="keyFob"
+                      defaultValue={user.keyFob}
+                      required
+                    />
+                  </div>
+
+                  <div className="field">
+                    <label htmlFor={`membershipType-${user.id}`}>
+                      Membership type
+                    </label>
+                    <select
+                      id={`membershipType-${user.id}`}
+                      name="membershipType"
+                      defaultValue={user.membershipType}
+                    >
+                      <option value="MEMBER">Member</option>
+                      <option value="NON_MEMBER">Non-member</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="actions">
+                  <button className="button secondary">
+                    Save member details
+                  </button>
+
+                  <button
+                    className="button"
+                    type="button"
+                    onClick={() =>
+                      updateUser(user.id, { status: "APPROVED" })
+                    }
+                  >
+                    Approve
+                  </button>
+
+                  <button
+                    className="button danger"
+                    type="button"
+                    onClick={() =>
+                      updateUser(user.id, { status: "REJECTED" })
+                    }
+                  >
+                    Reject
+                  </button>
+                </div>
+              </form>
+            </article>
           ))}
         </div>
       </section>
 
       <section className="card">
         <h2>Vote results</h2>
+
         <div className="stack">
           {classes.length === 0 && <p className="muted">No class pools created.</p>}
+
           {classes.map((item) => (
             <div className="row" key={item.id}>
               <div>
                 <strong>{item.title}</strong>
                 <div className="muted">{item.releaseAt}</div>
               </div>
+
               <div className="actions">
                 <span className="badge">YES: {item.yesCount}</span>
                 <span className="badge">NO: {item.noCount}</span>

@@ -1,78 +1,41 @@
-# Fitness Class Voting
+# Fitness Class Voting — Member Management Version
 
-A deploy-ready Next.js website for fitness-center member registration, admin approval, timed class voting, and Yes/No results.
+This version supports:
 
-## Features
+- Unique member key fob
+- Member / non-member classification
+- Admin editing of key fob
+- Admin changing membership type
+- Admin approval or rejection
+- Timed Yes / No voting
 
-- Email and password registration/login
-- Fitness center access key
-- Admin member approval or rejection
-- Timed class release and optional closing time
-- One Yes/No vote per approved member per class
-- Admin vote totals
-- Neon PostgreSQL through Prisma
-- Vercel-ready build
+## Database update
 
-## Open in Visual Studio Code
-
-1. Extract the ZIP.
-2. Open the extracted `fitness-class-voting` folder in Visual Studio Code.
-3. Open the integrated terminal.
-4. Run:
+Run:
 
 ```bash
 npm install
-```
-
-## Neon setup
-
-1. Create a Neon project.
-2. Open Neon **Connect**.
-3. Copy the pooled PostgreSQL connection string.
-4. Copy `.env.example` to `.env`.
-5. Place the Neon connection string in `DATABASE_URL`.
-6. Replace `JWT_SECRET` with a random value of at least 32 characters.
-7. Change the seed admin email, password, and center key.
-
-Example:
-
-```env
-DATABASE_URL="postgresql://...-pooler.../neondb?sslmode=require"
-JWT_SECRET="a-very-long-random-secret-change-this-now"
-SEED_ADMIN_EMAIL="admin@yourgym.com"
-SEED_ADMIN_PASSWORD="A-Strong-Password-123!"
-SEED_CENTER_KEY="YOURGYM2026"
-```
-
-## Create database tables and admin
-
-```bash
-npm run db:push
+npx prisma db push
 npm run db:seed
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Existing users will default to:
 
-The seed command creates:
+```text
+NON_MEMBER
+```
 
-- One fitness center
-- One approved administrator
-- One registration center key
+The admin can change them to `MEMBER` from the admin dashboard.
 
-## Vercel deployment
+## Vercel update
 
-1. Push the folder to a GitHub repository.
-2. Import the repository into Vercel.
-3. Add these Vercel environment variables:
-   - `DATABASE_URL`
-   - `JWT_SECRET`
-   - `SEED_ADMIN_EMAIL`
-   - `SEED_ADMIN_PASSWORD`
-   - `SEED_CENTER_KEY`
-4. Deploy.
-5. Database seeding should be performed locally once using the same Neon `DATABASE_URL`.
+After testing:
 
-## Important timezone note
+```bash
+git add .
+git commit -m "Add member and non-member management"
+git push
+```
 
-Displayed class times use `Asia/Kuala_Lumpur`. The browser sends admin date/time values as the administrator's local time and stores them as UTC in Neon.
+Vercel will redeploy automatically when connected to GitHub.

@@ -1,15 +1,15 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-  name: z.string().trim().min(2, "Name must contain at least 2 characters.").max(80),
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z.string().min(8, "Password must contain at least 8 characters.").max(128),
-  centerKey: z.string().trim().min(3).max(64)
+  name: z.string().trim().min(2).max(80),
+  email: z.string().trim().email(),
+  password: z.string().min(8).max(128),
+  keyFob: z.string().trim().min(2, "Enter your member key fob number.").max(80)
 });
 
 export const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid email address."),
-  password: z.string().min(1, "Password is required.")
+  email: z.string().trim().email(),
+  password: z.string().min(1)
 });
 
 export const voteSchema = z.object({
