@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum VoteValue {
+  YES
+  NO
+}
+
+model FitnessCenter {
+  id        String      @id @default(cuid())
+  name      String
+  centerKey String      @unique
+  users     User[]
+  classes   ClassSlot[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+}
+
+model User {
+  id              String        @id @default(cuid())
+  name            String
+  email           String        @unique
+  passwordHash    String
+  role            UserRole      @default(USER)
+  status          UserStatus    @default(PENDING)
+  fitnessCenterId String
+  fitnessCenter   FitnessCenter @relation(fields: [fitnessCenterId], references: [id], onDelete: Cascade)
+  votes           Vote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([fitnessCenterId])
+  @@index([status])
+}
+
+model ClassSlot {
+  id              String        @id @default(cuid())
+  title           String
+  description     String?
+  releaseAt       DateTime
+  closesAt        DateTime?
+  fitnessCenterId String
+  fitnessCenter   FitnessCenter @relation(fields: [fitnessCenterId], references: [id], onDelete: Cascade)
+  votes           Vote[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([fitnessCenterId, releaseAt])
+}
+
+model Vote {
+  id          String    @id @default(cuid())
+  userId      String
+  classSlotId String
+  value       VoteValue
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classSlot   ClassSlot @relation(fields: [classSlotId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([userId, classSlotId])
+  @@index([classSlotId, value])
+}
